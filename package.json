@@ -1,0 +1,18 @@
+{
+  "name": "hedera-x402-paid-lookup",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "node --env-file=.env server.mjs",
+    "buyer": "node --env-file=.env scripts/buyer.mjs",
+    "start": "node --env-file=.env server.mjs"
+  },
+  "dependencies": {
+    "@x402/hedera": "^2.0.0",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
