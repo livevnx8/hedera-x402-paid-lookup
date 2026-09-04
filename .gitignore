@@ -1,0 +1,21 @@
+# keys / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+**/hedera.json
+**/operator*
+**/private*
+
+# node
+node_modules/
+dist/
+build/
+.coverage/
+*.log
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
