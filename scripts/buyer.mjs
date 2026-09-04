@@ -1,5 +1,7 @@
 /**
- * Non-human buyer: unpaid GET → 402 → sign → Blocky402 verify/settle → retry with X-PAYMENT.
+ * Non-human buyer: unpaid GET → 402 → sign → retry with X-PAYMENT.
+ * Seller verifies+settles via hosted Blocky402.
+ * Do NOT settle in the buyer — double-settle causes DUPLICATE_TRANSACTION.
  */
 import { ExactHederaScheme } from "@x402/hedera/exact/client";
 import { createClientHederaSigner, PrivateKey } from "@x402/hedera";
@@ -42,38 +44,16 @@ async function main() {
     accepted: requirements,
     payload: signed.payload,
   };
-  const envelope = { x402Version: 2, paymentPayload, paymentRequirements: requirements };
-
-  console.log("3) POST /verify (facilitator claim)");
-  const verify = await fetch(`${FACILITATOR}/verify`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(envelope),
-  }).then((r) => r.json());
-  console.log("   isValid", verify.isValid, verify.invalidMessage || verify.invalidReason || "");
-  if (!verify.isValid) process.exit(2);
-
-  console.log("4) POST /settle (facilitator claim — confirm on HashScan independently)");
-  const settle = await fetch(`${FACILITATOR}/settle`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(envelope),
-  }).then((r) => r.json());
-  console.log("   success", settle.success, "tx", settle.transaction || settle.transactionId);
-  if (!settle.success) {
-    console.log(settle);
-    process.exit(2);
-  }
 
   const xPayment = Buffer.from(JSON.stringify(paymentPayload)).toString("base64");
-  console.log("5) retry GET with X-PAYMENT");
+  console.log("3) retry GET with X-PAYMENT (seller verifies+settles via Blocky402)");
   res = await fetch(LOOKUP_URL, { headers: { "X-PAYMENT": xPayment } });
   const paid = await res.json();
   console.log("   status", res.status);
   console.log(JSON.stringify(paid, null, 2));
   if (res.status !== 200) process.exit(2);
 
-  const tx = settle.transaction || settle.transactionId;
+  const tx = paid?.payment?.transactionId;
   if (tx) {
     const dash = String(tx).replace("@", "-").replace(/\.(?=\d+$)/, "-");
     console.log("HashScan (confirm SUCCESS yourself):");
