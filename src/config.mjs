@@ -8,8 +8,8 @@ export function getConfig() {
   if (!facilitatorUrl.includes("api.testnet.blocky402.com")) {
     throw new Error(`Gate 5: FACILITATOR_URL must be hosted Blocky402 testnet. Got: ${facilitatorUrl}`);
   }
-  const payTo = process.env.PAY_TO;
-  if (!payTo || !/^0\.0\.\d+$/.test(payTo)) {
+  const payTo = process.env.PAY_TO || "0.0.10239119";
+  if (!/^0\.0\.\d+$/.test(payTo)) {
     throw new Error("PAY_TO must be a Hedera account id like 0.0.12345");
   }
   const amount = process.env.AMOUNT_TINYBAR || "100000";
