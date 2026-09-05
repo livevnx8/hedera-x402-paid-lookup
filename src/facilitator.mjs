@@ -1,4 +1,20 @@
 /** Blocky402 hosted facilitator helpers. Facilitator JSON is a claim. */
+
+/** Pull Hedera tx id from facilitator fields or DUPLICATE error text. */
+export function extractHederaTxId(...candidates) {
+  for (const c of candidates) {
+    if (typeof c !== "string" || !c.trim()) continue;
+    const m = c.match(/0\.0\.\d+[@-]\d+[.\-]\d+/);
+    if (m) return m[0];
+  }
+  return null;
+}
+
+/** Mirror Node path form: 0.0.x-seconds-nanos */
+export function toMirrorTxId(txId) {
+  return String(txId).replace("@", "-").replace(/\.(\d+)$/, "-$1");
+}
+
 export async function fetchFeePayer(facilitatorUrl) {
   const res = await fetch(`${facilitatorUrl}/supported`);
   if (!res.ok) throw new Error(`GET /supported HTTP ${res.status}`);
@@ -9,6 +25,12 @@ export async function fetchFeePayer(facilitatorUrl) {
   return feePayer;
 }
 
+/**
+ * SETTLE-ONCE: only the resource server calls /settle.
+ * Buyer must sign + send X-PAYMENT only. If a prior settle already
+ * landed, DUPLICATE_TRANSACTION + Mirror CRYPTOTRANSFER SUCCESS still
+ * authorizes delivery (payment ≠ delivery; Mirror is ledger evidence).
+ */
 export async function verifyAndSettle(facilitatorUrl, paymentPayload, paymentRequirements) {
   const body = JSON.stringify({
     x402Version: 2,
@@ -37,16 +59,14 @@ export async function verifyAndSettle(facilitatorUrl, paymentPayload, paymentReq
   const settlement = await settleRes.json().catch(() => ({}));
   if (!settleRes.ok || !settlement.success) {
     const err = settlement.errorMessage || settlement.errorReason || `settle HTTP ${settleRes.status}`;
-    // Buyer may have already settled the same signed tx; facilitator then returns DUPLICATE.
-    // Independent evidence: Mirror CRYPTOTRANSFER SUCCESS.
     const dup =
       typeof err === "string" &&
       (err.includes("DUPLICATE_TRANSACTION") || err.includes("DUPLICATE"));
-    const txGuess =
-      settlement.transaction ||
-      settlement.transactionId ||
-      (typeof err === "string" && (err.match(/0\.0\.\d+[@-]\d+[.\-]\d+/) || [])[0]) ||
-      null;
+    const txGuess = extractHederaTxId(
+      settlement.transaction,
+      settlement.transactionId,
+      err,
+    );
     if (dup && txGuess) {
       const mirrorOk = await mirrorCryptoTransferSuccess(txGuess);
       if (mirrorOk.ok) {
@@ -72,8 +92,8 @@ export async function verifyAndSettle(facilitatorUrl, paymentPayload, paymentReq
   };
 }
 
-async function mirrorCryptoTransferSuccess(txId) {
-  const dash = String(txId).replace("@", "-").replace(/\.(\d+)$/, "-$1");
+export async function mirrorCryptoTransferSuccess(txId) {
+  const dash = toMirrorTxId(txId);
   try {
     const res = await fetch(
       `https://testnet.mirrornode.hedera.com/api/v1/transactions/${encodeURIComponent(dash)}`,

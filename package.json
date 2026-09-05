@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.mjs",
     "dev": "node --env-file=.env server.mjs",
-    "buyer": "node --env-file=.env scripts/buyer.mjs"
+    "buyer": "node --env-file=.env scripts/buyer.mjs",
+    "test": "node --test tests/settle-once.test.mjs"
   },
   "dependencies": {
     "express": "^4.21.2"
