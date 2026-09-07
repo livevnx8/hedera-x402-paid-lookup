@@ -30,3 +30,9 @@ Public seller: https://hedera-x402-paid-lookup-production.up.railway.app
 - GET /health → 200
 - unpaid GET /lookup → 402
 - Wet 2026-09-07: Mirror SUCCESS 0.0.7162784-1788800815-386309402 → DELIVERED
+
+## Docs
+
+- [DEMO.md](./DEMO.md) — four-beat live demo (402 → buyer signs → HashScan → honest fail)
+- [SUBMISSION.md](./SUBMISSION.md) — ETHOnline form draft + Sep 13 noon EDT checklist
+
