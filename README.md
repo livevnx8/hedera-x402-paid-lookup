@@ -22,3 +22,11 @@ Gate 1 (repo bootstrap): in progress.
 ## License
 
 MIT
+
+## Durable host
+
+Public seller: https://hedera-x402-paid-lookup-production.up.railway.app
+
+- GET /health → 200
+- unpaid GET /lookup → 402
+- Wet 2026-09-07: Mirror SUCCESS 0.0.7162784-1788800815-386309402 → DELIVERED
