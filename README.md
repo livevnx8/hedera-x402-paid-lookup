@@ -34,5 +34,7 @@ Public seller: https://hedera-x402-paid-lookup-production.up.railway.app
 ## Docs
 
 - [DEMO.md](./DEMO.md) — four-beat live demo (402 → buyer signs → HashScan → honest fail)
+- [DEMO-SCRIPT.md](./DEMO-SCRIPT.md) — spoken 2–4 min demo video script
+- [ETHGLOBAL-FORM.md](./ETHGLOBAL-FORM.md) — paste-ready Hacker Dashboard fields
 - [SUBMISSION.md](./SUBMISSION.md) — ETHOnline form draft + Sep 13 noon EDT checklist
 
